@@ -1,0 +1,33 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+
+# Rider / VS / VS Code
+.idea/
+.vs/
+*.user
+*.suo
+
+# Rider/EF
+*.DotSettings.user
+
+# OS
+.DS_Store
+
+# Tailwind tooling
+node_modules/
+src/AutoLedger.Web/wwwroot/css/site.css.map
+
+# Tailwind standalone binary (downloaded at build time)
+tailwindcss
+tools/tailwindcss
+
+# Secrets / env
+*.env
+.env
+appsettings.*.local.json
+
+# Logs
+*.log

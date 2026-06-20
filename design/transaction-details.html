@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AutoLedger — Transaction Details</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
+    colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e' } }
+  } } }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+</style>
+</head>
+<body class="bg-stone-100 text-stone-800 antialiased">
+
+<!-- dimmed context -->
+<div class="pointer-events-none fixed inset-0 select-none p-10 opacity-40 blur-[1px]">
+  <h1 class="text-2xl font-semibold text-stone-400">Transactions</h1>
+  <div class="mt-6 space-y-2"><div class="h-12 rounded-lg bg-white"></div><div class="h-12 rounded-lg bg-white"></div><div class="h-12 rounded-lg bg-white"></div></div>
+</div>
+
+<!-- MODAL -->
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-stone-900/30 p-4 backdrop-blur-sm sm:p-8">
+  <div class="my-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+
+    <!-- header -->
+    <div class="flex items-start justify-between gap-4 px-6 pt-6 pb-5">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 class="text-lg font-semibold text-stone-900 tnum">JE-2026-04418</h2>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> Pending Review</span>
+        </div>
+        <p class="mt-1 text-sm text-stone-400">Vendor payment — Hardware supplies · 20 Jun 2026</p>
+      </div>
+      <a href="transactions.html" class="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </a>
+    </div>
+
+    <!-- RISK (one quiet line, not a loud banner) -->
+    <div class="mx-6 flex items-center gap-3 rounded-xl bg-rose-50/70 px-4 py-3">
+      <span class="tnum flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-sm font-bold text-rose-700">87</span>
+      <div class="text-sm">
+        <span class="font-semibold text-rose-800">High risk</span>
+        <span class="text-rose-600/80"> · amount 312% above vendor average · new payee account</span>
+      </div>
+    </div>
+
+    <!-- LINES -->
+    <div class="px-6 py-5">
+      <div class="overflow-hidden rounded-xl border border-stone-200/80">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-stone-100 text-left text-[11px] uppercase tracking-wide text-stone-400">
+              <th class="px-4 py-2.5 font-semibold">Account</th>
+              <th class="px-4 py-2.5 font-semibold text-right">Debit</th>
+              <th class="px-4 py-2.5 font-semibold text-right">Credit</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-50">
+            <tr>
+              <td class="px-4 py-3"><span class="font-medium text-stone-800 tnum">5200</span> <span class="text-stone-400">Office Expenses</span></td>
+              <td class="px-4 py-3 text-right font-medium text-stone-800 tnum">€40.000,00</td>
+              <td class="px-4 py-3 text-right text-stone-300">—</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3"><span class="font-medium text-stone-800 tnum">1450</span> <span class="text-stone-400">Input VAT Receivable</span></td>
+              <td class="px-4 py-3 text-right font-medium text-stone-800 tnum">€8.920,00</td>
+              <td class="px-4 py-3 text-right text-stone-300">—</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3"><span class="font-medium text-stone-800 tnum">2100</span> <span class="text-stone-400">Accounts Payable</span></td>
+              <td class="px-4 py-3 text-right text-stone-300">—</td>
+              <td class="px-4 py-3 text-right font-medium text-stone-800 tnum">€48.920,00</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="border-t border-stone-200 bg-stone-50/70 text-sm font-semibold">
+              <td class="px-4 py-3 text-stone-500">Totals</td>
+              <td class="px-4 py-3 text-right text-stone-900 tnum">€48.920,00</td>
+              <td class="px-4 py-3 text-right text-stone-900 tnum">€48.920,00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="mt-2.5 flex items-center justify-center gap-1.5 text-xs font-medium text-emerald-600">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Balanced · difference €0,00
+      </p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="flex items-center justify-end gap-2 border-t border-stone-100 px-6 py-4">
+      <button class="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg> Reject
+      </button>
+      <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Approve & Post
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

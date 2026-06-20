@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/node_modules/
+.git/
+.github/
+.idea/
+.vs/
+design/
+tests/
+*.md
+.dockerignore
+docker-compose.yml
+**/.DS_Store

@@ -1,0 +1,115 @@
+@model JournalEntry
+@using System.Globalization
+@{
+    ViewData["Title"] = Model.ReferenceNumber;
+    var canDecide = User.IsInRole("Controller") && Model.Status == JournalEntryStatus.PendingReview;
+    // Full literal class strings (Tailwind can't generate classes from runtime concatenation).
+    var (riskBox, riskChip, riskTitle, riskSub) = Model.RiskScore >= 50
+        ? ("bg-rose-50/70", "bg-rose-100 text-rose-700", "text-rose-800", "text-rose-600/80")
+        : Model.RiskScore >= 20
+            ? ("bg-amber-50/70", "bg-amber-100 text-amber-700", "text-amber-800", "text-amber-600/80")
+            : ("bg-emerald-50/70", "bg-emerald-100 text-emerald-700", "text-emerald-800", "text-emerald-600/80");
+}
+<div class="mx-auto max-w-2xl">
+    <a href="@Url.Action("Index", "Transactions")" class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-stone-400 hover:text-stone-600">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg> Back to transactions
+    </a>
+
+    @if (TempData["Error"] is string err)
+    {
+        <div class="mb-4 rounded-lg bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700">@err</div>
+    }
+    @if (TempData["Message"] is string msg)
+    {
+        <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700">@msg</div>
+    }
+
+    <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <div class="flex items-start justify-between gap-4 px-6 pt-6 pb-5">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <h2 class="text-lg font-semibold text-stone-900 tnum">@Model.ReferenceNumber</h2>
+                    @await Component.InvokeAsync("StatusBadge", new { status = Model.Status })
+                </div>
+                <p class="mt-1 text-sm text-stone-400">@Model.Description · @Model.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)@(Model.Vendor is null ? "" : $" · {Model.Vendor.Name}")</p>
+            </div>
+        </div>
+
+        @if (Model.RiskScore > 0)
+        {
+            <div class="mx-6 flex items-center gap-3 rounded-xl @riskBox px-4 py-3">
+                <span class="tnum flex h-9 w-9 shrink-0 items-center justify-center rounded-full @riskChip text-sm font-bold">@Model.RiskScore</span>
+                <div class="text-sm">
+                    <span class="font-semibold @riskTitle">Risk score @Model.RiskScore / 100</span>
+                    <span class="@riskSub"> · @(Model.RiskScore >= 20 ? "routed to manual review" : "within auto-approval tolerance")</span>
+                </div>
+            </div>
+        }
+
+        <div class="px-6 py-5">
+            <div class="overflow-hidden rounded-xl border border-stone-200/80">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-stone-100 text-left text-[11px] uppercase tracking-wide text-stone-400">
+                            <th class="px-4 py-2.5 font-semibold">Account</th>
+                            <th class="px-4 py-2.5 font-semibold text-right">Debit</th>
+                            <th class="px-4 py-2.5 font-semibold text-right">Credit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-50">
+                        @foreach (var line in Model.Lines)
+                        {
+                            <tr>
+                                <td class="px-4 py-3"><span class="font-medium text-stone-800 tnum">@line.Account?.Code</span> <span class="text-stone-400">@line.Account?.Name</span></td>
+                                <td class="px-4 py-3 text-right tnum @(line.DebitAmount > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(line.DebitAmount > 0 ? Money.Format(line.DebitAmount) : "—")</td>
+                                <td class="px-4 py-3 text-right tnum @(line.CreditAmount > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(line.CreditAmount > 0 ? Money.Format(line.CreditAmount) : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-t border-stone-200 bg-stone-50/70 text-sm font-semibold">
+                            <td class="px-4 py-3 text-stone-500">Totals</td>
+                            <td class="px-4 py-3 text-right text-stone-900 tnum">@Money.Format(Model.TotalDebit)</td>
+                            <td class="px-4 py-3 text-right text-stone-900 tnum">@Money.Format(Model.TotalCredit)</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="mt-2.5 flex items-center justify-center gap-1.5 text-xs font-medium @(Model.IsBalanced ? "text-emerald-600" : "text-rose-600")">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                @(Model.IsBalanced ? "Balanced · difference €0,00" : Money.FormatSigned(Model.TotalDebit - Model.TotalCredit) + " out of balance")
+            </p>
+
+            @if (Model.Status == JournalEntryStatus.Rejected && Model.RejectionReason is not null)
+            {
+                <div class="mt-4 rounded-xl bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
+                    <span class="font-semibold">Rejected by @Model.ReviewedBy:</span> @Model.RejectionReason
+                </div>
+            }
+        </div>
+
+        @if (canDecide)
+        {
+            <div class="border-t border-stone-100 px-6 py-4">
+                <div class="flex items-center justify-end gap-2">
+                    <form asp-action="Approve" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Approve &amp; Post
+                        </button>
+                    </form>
+                </div>
+                <form asp-action="Reject" method="post" class="mt-3 flex items-center gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input name="reason" placeholder="Reason for rejection…" required
+                           class="flex-1 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100" />
+                    <button type="submit" class="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg> Reject
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

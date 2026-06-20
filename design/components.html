@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AutoLedger — Design System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
+    colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e' } }
+  } } }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+  .skel { position: relative; overflow: hidden; background: #ecebe8; }
+  .skel::after { content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent); animation:shimmer 1.4s infinite; }
+</style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased">
+
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="hidden lg:flex w-60 flex-col border-r border-stone-200/70 bg-white">
+    <div class="flex h-16 items-center gap-2.5 px-5">
+      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-700 text-white font-bold text-sm">A</div>
+      <div class="leading-tight"><div class="text-[15px] font-semibold text-stone-900">AutoLedger</div><div class="text-[11px] text-stone-400 font-medium">General Ledger</div></div>
+    </div>
+    <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 text-sm">
+      <a href="dashboard-v2.html" class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg> Dashboard</a>
+      <a href="transactions.html" class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg> Transactions</a>
+      <a href="create-transaction.html" class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6M9 14h6"/></svg> Journal Entry</a>
+      <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Trial Balance</a>
+      <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Chart of Accounts</a>
+      <div class="my-2 border-t border-stone-100"></div>
+      <a href="transactions.html" class="flex items-center justify-between rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
+        <span class="flex items-center gap-3"><svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg> Approvals</span>
+        <span class="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 tnum">7</span></a>
+      <a href="components.html" class="flex items-center gap-3 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900">
+        <svg class="h-[18px] w-[18px] text-brand-700" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Components</a>
+    </nav>
+    <div class="p-3">
+      <div class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-stone-50">
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-[12px] font-semibold text-white">JM</div>
+        <div class="leading-tight min-w-0"><div class="truncate text-[13px] font-medium text-stone-800">Jelena Marić</div><div class="truncate text-[11px] text-stone-400">Controller</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex flex-1 flex-col min-w-0">
+    <header class="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-stone-200/70 bg-stone-50/90 px-6 backdrop-blur">
+      <div class="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg bg-brand-700 text-white font-bold text-sm">A</div>
+      <h2 class="text-sm font-semibold text-stone-600">Design System</h2>
+      <span class="ml-auto text-xs text-stone-400">Inter · Tailwind</span>
+    </header>
+
+    <main class="flex-1 overflow-y-auto px-6 py-8 lg:px-10">
+      <div class="mx-auto max-w-4xl space-y-10">
+
+        <div>
+          <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Components & States</h1>
+          <p class="mt-1 text-sm text-stone-400">The shared minimal language across every screen.</p>
+        </div>
+
+        <!-- STATUS PILLS -->
+        <section>
+          <h2 class="mb-4 text-sm font-medium text-stone-500">Status Pills</h2>
+          <div class="flex flex-wrap gap-3">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-500"><span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span> Draft</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> Pending Review</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Approved</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span> Posted</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> Rejected</span>
+          </div>
+        </section>
+
+        <!-- PALETTE + TYPE -->
+        <section class="grid grid-cols-1 gap-10 sm:grid-cols-2">
+          <div>
+            <h2 class="mb-4 text-sm font-medium text-stone-500">Palette</h2>
+            <div class="flex flex-wrap gap-3">
+              <div><div class="h-12 w-12 rounded-lg bg-stone-900"></div><p class="mt-1 text-[10px] text-stone-400">ink</p></div>
+              <div><div class="h-12 w-12 rounded-lg bg-stone-300"></div><p class="mt-1 text-[10px] text-stone-400">neutral</p></div>
+              <div><div class="h-12 w-12 rounded-lg bg-brand-700"></div><p class="mt-1 text-[10px] text-stone-400">primary</p></div>
+              <div><div class="h-12 w-12 rounded-lg bg-emerald-500"></div><p class="mt-1 text-[10px] text-stone-400">in</p></div>
+              <div><div class="h-12 w-12 rounded-lg bg-rose-400"></div><p class="mt-1 text-[10px] text-stone-400">out</p></div>
+              <div><div class="h-12 w-12 rounded-lg bg-amber-500"></div><p class="mt-1 text-[10px] text-stone-400">pending</p></div>
+            </div>
+          </div>
+          <div>
+            <h2 class="mb-4 text-sm font-medium text-stone-500">Type & Figures</h2>
+            <div class="space-y-2.5">
+              <div class="flex items-baseline justify-between"><span class="text-2xl font-semibold text-stone-900">Heading</span><span class="text-xs text-stone-400">24 / 600</span></div>
+              <div class="flex items-baseline justify-between"><span class="text-sm text-stone-600">Body text</span><span class="text-xs text-stone-400">14 / 400</span></div>
+              <div class="flex items-baseline justify-between"><span class="tnum text-base font-medium text-stone-900">€1.234.567,89</span><span class="text-xs text-stone-400">tabular</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BUTTONS -->
+        <section>
+          <h2 class="mb-4 text-sm font-medium text-stone-500">Buttons</h2>
+          <div class="flex flex-wrap items-center gap-3">
+            <button class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">Primary</button>
+            <button class="rounded-lg px-4 py-2 text-sm font-medium text-stone-500 hover:bg-stone-100">Ghost</button>
+            <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Approve</button>
+            <button class="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg> Reject</button>
+            <button disabled class="rounded-lg bg-stone-200 px-4 py-2 text-sm font-semibold text-stone-400 cursor-not-allowed">Disabled</button>
+          </div>
+        </section>
+
+        <!-- STATES -->
+        <section>
+          <h2 class="mb-4 text-sm font-medium text-stone-500">Screen States</h2>
+          <div class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-200/60 sm:grid-cols-3">
+            <div class="bg-white p-6">
+              <p class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-stone-400">Empty</p>
+              <div class="flex flex-col items-center py-4 text-center">
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-stone-100 text-stone-400"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg></div>
+                <p class="mt-3 text-sm font-semibold text-stone-800">No transactions</p>
+                <p class="mt-1 text-xs text-stone-400">Nothing matches yet.</p>
+              </div>
+            </div>
+            <div class="bg-white p-6">
+              <p class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-stone-400">Loading</p>
+              <div class="space-y-3 py-2">
+                <div class="skel h-4 w-3/4 rounded"></div><div class="skel h-4 w-full rounded"></div><div class="skel h-4 w-5/6 rounded"></div>
+                <div class="flex items-center gap-3 pt-1"><div class="skel h-8 w-8 rounded-full"></div><div class="skel h-4 flex-1 rounded"></div></div>
+              </div>
+            </div>
+            <div class="bg-white p-6">
+              <p class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-stone-400">Error</p>
+              <div class="flex flex-col items-center py-4 text-center">
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-500"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+                <p class="mt-3 text-sm font-semibold text-stone-800">Couldn't load</p>
+                <p class="mt-1 text-xs text-stone-400">Service unavailable.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCREEN LINKS -->
+        <section>
+          <h2 class="mb-4 text-sm font-medium text-stone-500">Screens</h2>
+          <div class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-200/60 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="dashboard-v2.html" class="group bg-white p-5 hover:bg-stone-50"><div class="text-sm font-semibold text-stone-800 group-hover:text-brand-700">Dashboard →</div><p class="mt-0.5 text-xs text-stone-400">Net cash flow</p></a>
+            <a href="transactions.html" class="group bg-white p-5 hover:bg-stone-50"><div class="text-sm font-semibold text-stone-800 group-hover:text-brand-700">Transactions →</div><p class="mt-0.5 text-xs text-stone-400">Grid + states</p></a>
+            <a href="transaction-details.html" class="group bg-white p-5 hover:bg-stone-50"><div class="text-sm font-semibold text-stone-800 group-hover:text-brand-700">Details →</div><p class="mt-0.5 text-xs text-stone-400">Debit/credit modal</p></a>
+            <a href="create-transaction.html" class="group bg-white p-5 hover:bg-stone-50"><div class="text-sm font-semibold text-stone-800 group-hover:text-brand-700">New Entry →</div><p class="mt-0.5 text-xs text-stone-400">Live balance</p></a>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

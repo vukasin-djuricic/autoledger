@@ -1,0 +1,25 @@
+# Fly.io configuration for AutoLedger.
+# Deploy: `fly launch` (first time) then `fly deploy`.
+# Provision a database and wire it up: `fly postgres create` + `fly postgres attach <db-app>`
+# (attaching injects the DATABASE_URL secret that the app reads at startup).
+
+app = "autoledger"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ASPNETCORE_URLS = "http://0.0.0.0:8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

@@ -1,0 +1,132 @@
+@model DashboardViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Dashboard";
+    var now = DateTime.UtcNow;
+    string MonthLabel(CashFlowPoint p) =>
+        new DateOnly(p.Year, p.Month, 1).ToString("MMM", CultureInfo.InvariantCulture);
+    var moneyInPct = Model.MoneyIn + Model.MoneyOut == 0 ? 0
+        : (int)Math.Round(Model.MoneyIn / Math.Max(Model.MoneyIn, Model.MoneyOut) * 100);
+    var moneyOutPct = Model.MoneyIn + Model.MoneyOut == 0 ? 0
+        : (int)Math.Round(Model.MoneyOut / Math.Max(Model.MoneyIn, Model.MoneyOut) * 100);
+}
+<div class="mx-auto max-w-5xl">
+    @if (TempData["Message"] is string msg)
+    {
+        <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700">@msg</div>
+    }
+
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-sm font-medium text-stone-400">Period @now.ToString("MM · MMMM yyyy", CultureInfo.InvariantCulture)</p>
+            <h1 class="mt-0.5 text-[28px] font-semibold tracking-tight text-stone-900">Financial overview</h1>
+        </div>
+    </div>
+
+    <!-- HERO: NET CASH FLOW -->
+    <section class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-12">
+            <div class="border-b border-stone-100 p-7 md:col-span-5 md:border-b-0 md:border-r">
+                <p class="text-sm font-medium text-stone-400">Net cash flow</p>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="tnum text-[40px] font-semibold leading-none tracking-tight text-stone-900">@Money.Format(Model.NetCashFlow)</span>
+                </div>
+                @if (Model.HasComparison)
+                {
+                    var up = Model.NetChangePercent >= 0;
+                    <div class="mt-3 inline-flex items-center gap-1.5 rounded-full @(up ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700") px-2.5 py-1 text-xs font-semibold">
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            @if (up) { <path d="m6 15 6-6 6 6" /> } else { <path d="m6 9 6 6 6-6" /> }
+                        </svg>
+                        <span class="tnum">@(up ? "+" : "")@Money.Percent(Model.NetChangePercent)</span>
+                        <span class="font-normal opacity-80">vs last month</span>
+                    </div>
+                }
+
+                <div class="mt-7 space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Money in</span>
+                            <span class="tnum font-semibold text-stone-900">@Money.Format(Model.MoneyIn)</span>
+                        </div>
+                        <div class="mt-1.5 h-2 w-full rounded-full bg-stone-100"><div class="h-full rounded-full bg-emerald-500" style="width:@(moneyInPct)%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span> Money out</span>
+                            <span class="tnum font-semibold text-stone-900">@Money.Format(Model.MoneyOut)</span>
+                        </div>
+                        <div class="mt-1.5 h-2 w-full rounded-full bg-stone-100"><div class="h-full rounded-full bg-rose-400" style="width:@(moneyOutPct)%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-7 md:col-span-7">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-stone-500">Monthly trend</p>
+                    <div class="flex items-center gap-4 text-xs text-stone-500">
+                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-emerald-500"></span> In</span>
+                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-rose-300"></span> Out</span>
+                    </div>
+                </div>
+                <div class="mt-6 flex items-end justify-between gap-4" style="height:170px">
+                    @foreach (var p in Model.Months)
+                    {
+                        <div class="group flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                            <div class="flex h-full w-full items-end justify-center gap-1">
+                                <div class="w-3 rounded-t bg-emerald-500" style="height:@(Model.BarHeight(p.Income))%"></div>
+                                <div class="w-3 rounded-t bg-rose-300" style="height:@(Model.BarHeight(p.Expense))%"></div>
+                            </div>
+                            <span class="text-[11px] font-medium text-stone-400">@MonthLabel(p)</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECONDARY STATS -->
+    <div class="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-200/60 sm:grid-cols-2">
+        <a href="@Url.Action("Index", "Transactions", new { status = "PendingReview" })" class="group flex items-center justify-between bg-white p-6 hover:bg-stone-50">
+            <div>
+                <p class="text-sm font-medium text-stone-400">Pending approvals</p>
+                <p class="mt-1 flex items-baseline gap-2"><span class="tnum text-2xl font-semibold text-rose-600">@Model.Summary.PendingCount</span><span class="tnum text-sm text-stone-400">· @Money.Format(Model.Summary.PendingHeld) held</span></p>
+            </div>
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-500 transition group-hover:translate-x-0.5"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <div class="bg-white p-6">
+            <p class="text-sm font-medium text-stone-400">Auto-posting rate</p>
+            <p class="mt-1 flex items-baseline gap-2"><span class="tnum text-2xl font-semibold text-stone-900">@Money.Percent(Model.Summary.AutoPostingRate)</span><span class="text-sm text-stone-400">automated</span></p>
+            <div class="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100"><div class="h-full rounded-full bg-brand-600" style="width:@Model.Summary.AutoPostingRate.ToString(CultureInfo.InvariantCulture)%"></div></div>
+        </div>
+    </div>
+
+    <!-- NEEDS REVIEW -->
+    <section class="mt-6">
+        <div class="mb-3 flex items-center justify-between px-1">
+            <h2 class="text-base font-semibold text-stone-900">Needs your review</h2>
+            <a href="@Url.Action("Index", "Transactions", new { status = "PendingReview" })" class="text-sm font-medium text-brand-700 hover:text-brand-600">View all</a>
+        </div>
+        <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm divide-y divide-stone-100">
+            @if (Model.NeedsReview.Count == 0)
+            {
+                <div class="px-5 py-10 text-center text-sm text-stone-400">Nothing waiting — all caught up.</div>
+            }
+            @foreach (var e in Model.NeedsReview)
+            {
+                var account = e.Lines.FirstOrDefault()?.Account;
+                <a href="@Url.Action("Details", "JournalEntries", new { id = e.Id })" class="flex items-center gap-4 px-5 py-4 hover:bg-stone-50">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-medium text-stone-800">@e.Description</p>
+                        <p class="truncate text-xs text-stone-400 tnum">@e.ReferenceNumber@(account is null ? "" : $" · {account.Code} {account.Name}")</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="tnum text-sm font-semibold text-stone-900">@Money.Format(e.TotalDebit)</p>
+                        <div class="mt-0.5">@await Component.InvokeAsync("StatusBadge", new { status = e.Status })</div>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+</div>

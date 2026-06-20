@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Access denied";
+}
+<div class="mx-auto max-w-md py-20 text-center">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    </div>
+    <h1 class="mt-4 text-lg font-semibold text-stone-800">Access denied</h1>
+    <p class="mt-1 text-sm text-stone-400">Only a Controller can approve or reject entries. You're signed in without that role.</p>
+    <a href="@Url.Action("Index", "Dashboard")" class="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Back to dashboard</a>
+</div>
