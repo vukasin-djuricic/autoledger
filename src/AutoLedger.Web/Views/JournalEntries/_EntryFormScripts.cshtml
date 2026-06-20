@@ -1,0 +1,70 @@
+<script>
+    const tbody = document.getElementById('lines');
+    function fmt(n){ return '€' + n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+    function reindex(){
+        [...tbody.querySelectorAll('.line-row')].forEach((row, i) => {
+            row.querySelector('.line-account').name = `Lines[${i}].AccountId`;
+            row.querySelector('.line-debit').name   = `Lines[${i}].Debit`;
+            row.querySelector('.line-credit').name  = `Lines[${i}].Credit`;
+        });
+    }
+
+    function recalc(){
+        let td = 0, tc = 0;
+        tbody.querySelectorAll('.line-row').forEach(row => {
+            td += parseFloat(row.querySelector('.line-debit').value) || 0;
+            tc += parseFloat(row.querySelector('.line-credit').value) || 0;
+        });
+        const diff = td - tc, balanced = Math.abs(diff) < 0.005 && td > 0;
+        document.getElementById('sumDebit').textContent = fmt(td);
+        document.getElementById('sumCredit').textContent = fmt(tc);
+        const pill = document.getElementById('balPill'), icon = document.getElementById('balIcon'),
+              label = document.getElementById('balLabel'), dEl = document.getElementById('balDiff'),
+              btn = document.getElementById('submitBtn');
+        dEl.textContent = (diff >= 0 ? '€' : '−€') + Math.abs(diff).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (balanced){
+            pill.className = 'mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 ring-1 ring-inset bg-emerald-50/60 ring-emerald-200';
+            icon.className = 'flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white';
+            icon.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+            label.textContent = 'Balanced'; label.className = 'text-sm font-semibold text-emerald-700';
+            dEl.className = 'tnum font-semibold text-emerald-700';
+            btn.disabled = false; btn.className = 'flex items-center gap-1.5 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600 cursor-pointer';
+        } else {
+            pill.className = 'mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 ring-1 ring-inset bg-rose-50/60 ring-rose-200';
+            icon.className = 'flex h-7 w-7 items-center justify-center rounded-full bg-rose-500 text-white';
+            icon.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/></svg>';
+            label.textContent = (td === 0 ? 'No amounts entered' : 'Out of balance'); label.className = 'text-sm font-semibold text-rose-700';
+            dEl.className = 'tnum font-semibold text-rose-700';
+            btn.disabled = true; btn.className = 'flex items-center gap-1.5 rounded-lg bg-stone-200 px-4 py-2 text-sm font-semibold text-stone-400 shadow-sm cursor-not-allowed';
+        }
+    }
+
+    tbody.addEventListener('input', e => {
+        if (e.target.classList.contains('line-debit') && e.target.value !== ''){
+            e.target.closest('.line-row').querySelector('.line-credit').value = '';
+        } else if (e.target.classList.contains('line-credit') && e.target.value !== ''){
+            e.target.closest('.line-row').querySelector('.line-debit').value = '';
+        }
+        recalc();
+    });
+
+    tbody.addEventListener('click', e => {
+        const btn = e.target.closest('.remove-line');
+        if (!btn) return;
+        const rows = tbody.querySelectorAll('.line-row');
+        if (rows.length > 1) btn.closest('.line-row').remove();
+        reindex(); recalc();
+    });
+
+    document.getElementById('addLine').addEventListener('click', () => {
+        const last = tbody.querySelector('.line-row');
+        const clone = last.cloneNode(true);
+        clone.querySelectorAll('input').forEach(i => i.value = '');
+        clone.querySelector('.line-account').value = '';
+        tbody.appendChild(clone);
+        reindex(); recalc();
+    });
+
+    recalc();
+</script>

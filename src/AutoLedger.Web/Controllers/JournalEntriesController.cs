@@ -1,5 +1,6 @@
 using AutoLedger.Domain.Abstractions;
 using AutoLedger.Domain.Entities;
+using AutoLedger.Domain.Enums;
 using AutoLedger.Domain.Exceptions;
 using AutoLedger.Domain.Services;
 using AutoLedger.Infrastructure.Identity;
@@ -82,6 +83,100 @@ public class JournalEntriesController : Controller
     {
         var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
         return entry is null ? NotFound() : View(entry);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
+    {
+        var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
+        if (entry is null) return NotFound();
+        if (entry.Status != JournalEntryStatus.Draft)
+        {
+            TempData["Error"] = "Only draft entries can be edited. Reopen a rejected entry first.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var model = new CreateJournalEntryViewModel
+        {
+            Date = entry.Date,
+            Reference = entry.ReferenceNumber,
+            Description = entry.Description,
+            VendorId = entry.VendorId,
+            Lines = entry.Lines
+                .Select(l => new LineInput
+                {
+                    AccountId = l.AccountId,
+                    Debit = l.DebitAmount == 0 ? null : l.DebitAmount,
+                    Credit = l.CreditAmount == 0 ? null : l.CreditAmount,
+                })
+                .ToList(),
+        };
+
+        ViewData["EntryId"] = id;
+        await PopulateOptionsAsync(model, cancellationToken);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, CreateJournalEntryViewModel model, CancellationToken cancellationToken)
+    {
+        var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
+        if (entry is null) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                entry.UpdateHeader(model.Date, model.Reference, model.Description, model.VendorId);
+                entry.ClearLines();
+                foreach (var line in model.Lines)
+                {
+                    if (line.AccountId is not int accountId) continue;
+                    var debit = line.Debit ?? 0m;
+                    var credit = line.Credit ?? 0m;
+                    if (debit == 0 && credit == 0) continue;
+                    entry.AddLine(accountId, debit, credit);
+                }
+
+                var assessment = await _workflow.SubmitAsync(entry, cancellationToken);
+
+                TempData["Message"] = assessment.RequiresReview
+                    ? $"Entry {entry.ReferenceNumber} resubmitted for review (risk score {assessment.Score})."
+                    : $"Entry {entry.ReferenceNumber} auto-approved and posted.";
+
+                return RedirectToAction(nameof(Details), new { id = entry.Id });
+            }
+            catch (Exception ex) when (ex is UnbalancedEntryException or ArgumentException or InvalidTransitionException)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+        }
+
+        ViewData["EntryId"] = id;
+        await PopulateOptionsAsync(model, cancellationToken);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reopen(int id, CancellationToken cancellationToken)
+    {
+        var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
+        if (entry is null) return NotFound();
+
+        try
+        {
+            entry.Reopen();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            TempData["Message"] = $"Entry {entry.ReferenceNumber} reopened for editing.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+        catch (InvalidTransitionException ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 
     [HttpPost]

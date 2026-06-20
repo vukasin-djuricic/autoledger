@@ -1,0 +1,17 @@
+@model CreateJournalEntryViewModel
+@{
+    ViewData["Title"] = "Edit Journal Entry";
+    ViewData["Action"] = "Edit";
+}
+<div class="mx-auto max-w-3xl">
+    <div class="mb-6">
+        <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Edit Journal Entry</h1>
+        <p class="mt-1 text-sm text-stone-400">Correct the entry, then resubmit it for approval.</p>
+    </div>
+
+    <partial name="_EntryForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_EntryFormScripts" />
+}

@@ -21,6 +21,7 @@ public abstract class JournalEntryState
     public virtual void Approve(JournalEntry entry, string reviewedBy) => throw Illegal(entry, "approve");
     public virtual void Reject(JournalEntry entry, string reviewedBy, string reason) => throw Illegal(entry, "reject");
     public virtual void Post(JournalEntry entry) => throw Illegal(entry, "post");
+    public virtual void Reopen(JournalEntry entry) => throw Illegal(entry, "reopen");
 
     protected static InvalidTransitionException Illegal(JournalEntry entry, string action) =>
         new(entry.Status, action);

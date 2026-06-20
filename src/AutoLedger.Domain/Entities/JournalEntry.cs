@@ -73,6 +73,23 @@ public class JournalEntry
         _lines.Add(new JournalEntryLine(accountId, debit, credit));
     }
 
+    /// <summary>Removes all lines so an editable entry can be re-entered from scratch.</summary>
+    public void ClearLines()
+    {
+        EnsureEditable();
+        _lines.Clear();
+    }
+
+    /// <summary>Updates the header fields of an editable (Draft) entry.</summary>
+    public void UpdateHeader(DateOnly date, string referenceNumber, string description, int? vendorId)
+    {
+        EnsureEditable();
+        Date = date;
+        ReferenceNumber = referenceNumber;
+        Description = description;
+        VendorId = vendorId;
+    }
+
     /// <summary>
     /// Builds a balancing reversal of this posted entry: a new draft with every debit and
     /// credit swapped, linked back to the original. The original stays immutable — only the
@@ -127,6 +144,9 @@ public class JournalEntry
     public void Reject(string reviewedBy, string reason) => State.Reject(this, reviewedBy, reason);
     public void Post() => State.Post(this);
 
+    /// <summary>Reopens a rejected entry for correction (Rejected → Draft).</summary>
+    public void Reopen() => State.Reopen(this);
+
     public void SetRiskScore(int score)
     {
         EnsureEditable();
@@ -142,6 +162,13 @@ public class JournalEntry
         ReviewedBy = reviewedBy;
         ReviewedAt = DateTime.UtcNow;
         RejectionReason = rejectionReason;
+    }
+
+    internal void ClearReview()
+    {
+        ReviewedBy = null;
+        ReviewedAt = null;
+        RejectionReason = null;
     }
 
     private void EnsureEditable()
