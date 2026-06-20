@@ -132,6 +132,27 @@ public class JournalEntriesController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    [HttpPost]
+    [Authorize(Roles = Roles.Controller)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reverse(int id, CancellationToken cancellationToken)
+    {
+        var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
+        if (entry is null) return NotFound();
+
+        try
+        {
+            var reversal = await _workflow.ReverseAsync(entry, User.Identity?.Name ?? "controller", cancellationToken);
+            TempData["Message"] = $"Entry {entry.ReferenceNumber} reversed by {reversal.ReferenceNumber}.";
+            return RedirectToAction(nameof(Details), new { id = reversal.Id });
+        }
+        catch (Exception ex) when (ex is InvalidTransitionException or InvalidOperationException or UnbalancedEntryException)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
     private async Task PopulateOptionsAsync(CreateJournalEntryViewModel model, CancellationToken cancellationToken)
     {
         model.AccountOptions = await _db.Accounts

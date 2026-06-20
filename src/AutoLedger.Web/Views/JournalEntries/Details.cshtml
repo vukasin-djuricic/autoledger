@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = Model.ReferenceNumber;
     var canDecide = User.IsInRole("Controller") && Model.Status == JournalEntryStatus.PendingReview;
+    var canReverse = User.IsInRole("Controller") && Model.Status == JournalEntryStatus.Posted && !Model.IsReversed;
     // Full literal class strings (Tailwind can't generate classes from runtime concatenation).
     var (riskBox, riskChip, riskTitle, riskSub) = Model.RiskScore >= 50
         ? ("bg-rose-50/70", "bg-rose-100 text-rose-700", "text-rose-800", "text-rose-600/80")
@@ -34,6 +35,21 @@
                 <p class="mt-1 text-sm text-stone-400">@Model.Description · @Model.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)@(Model.Vendor is null ? "" : $" · {Model.Vendor.Name}")</p>
             </div>
         </div>
+
+        @if (Model.IsReversed && Model.ReversedBy is not null)
+        {
+            <div class="mx-6 mb-1 flex items-center gap-2 rounded-xl bg-stone-50 px-4 py-2.5 text-sm text-stone-600">
+                <svg class="h-4 w-4 shrink-0 text-stone-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7h11a4 4 0 0 1 0 8H6m0 0 3-3m-3 3 3 3"/></svg>
+                <span>Reversed by <a class="font-semibold text-stone-800 hover:underline tnum" href="@Url.Action("Details", new { id = Model.ReversedBy.Id })">@Model.ReversedBy.ReferenceNumber</a></span>
+            </div>
+        }
+        @if (Model.IsReversal && Model.ReversalOf is not null)
+        {
+            <div class="mx-6 mb-1 flex items-center gap-2 rounded-xl bg-stone-50 px-4 py-2.5 text-sm text-stone-600">
+                <svg class="h-4 w-4 shrink-0 text-stone-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 7H10a4 4 0 0 0 0 8h8m0 0-3-3m3 3-3 3"/></svg>
+                <span>Reversal of <a class="font-semibold text-stone-800 hover:underline tnum" href="@Url.Action("Details", new { id = Model.ReversalOf.Id })">@Model.ReversalOf.ReferenceNumber</a></span>
+            </div>
+        }
 
         @if (Model.RiskScore > 0)
         {
@@ -109,6 +125,22 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg> Reject
                     </button>
                 </form>
+            </div>
+        }
+
+        @if (canReverse)
+        {
+            <div class="border-t border-stone-100 px-6 py-4">
+                <div class="flex items-center justify-between gap-4">
+                    <p class="text-xs text-stone-400">Posted entries are immutable. To correct one, post a reversing entry that cancels it.</p>
+                    <form asp-action="Reverse" method="post" onsubmit="return confirm('Post a reversing entry that cancels @Model.ReferenceNumber?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7h11a4 4 0 0 1 0 8H6m0 0 3-3m-3 3 3 3"/></svg> Reverse entry
+                        </button>
+                    </form>
+                </div>
             </div>
         }
     </div>

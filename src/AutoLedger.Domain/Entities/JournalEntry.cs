@@ -35,6 +35,21 @@ public class JournalEntry
     public DateTime? ReviewedAt { get; private set; }
     public string? RejectionReason { get; private set; }
 
+    // ---- Reversal (storno) links --------------------------------------------
+
+    /// <summary>When this entry is a reversal, the original posted entry it cancels.</summary>
+    public int? ReversalOfEntryId { get; private set; }
+    public JournalEntry? ReversalOf { get; private set; }
+
+    /// <summary>The reversal entry that cancels this one, once it has been reversed.</summary>
+    public JournalEntry? ReversedBy { get; private set; }
+
+    /// <summary>True when this entry was itself created to reverse another entry.</summary>
+    public bool IsReversal => ReversalOfEntryId is not null || ReversalOf is not null;
+
+    /// <summary>True once a reversal has been posted against this entry.</summary>
+    public bool IsReversed => ReversedBy is not null;
+
     public IReadOnlyCollection<JournalEntryLine> Lines => _lines.AsReadOnly();
 
     private JournalEntry() { } // EF
@@ -56,6 +71,36 @@ public class JournalEntry
     {
         EnsureEditable();
         _lines.Add(new JournalEntryLine(accountId, debit, credit));
+    }
+
+    /// <summary>
+    /// Builds a balancing reversal of this posted entry: a new draft with every debit and
+    /// credit swapped, linked back to the original. The original stays immutable — only the
+    /// in-memory link is established (EF persists the foreign key when the reversal is saved).
+    /// </summary>
+    public JournalEntry CreateReversal(string createdBy)
+    {
+        if (Status != JournalEntryStatus.Posted)
+            throw new InvalidTransitionException(Status, "reverse");
+        if (IsReversed)
+            throw new InvalidOperationException(
+                $"Entry {ReferenceNumber} has already been reversed by {ReversedBy?.ReferenceNumber}.");
+
+        var reversal = new JournalEntry(
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            $"REV-{ReferenceNumber}",
+            $"Reversal of {ReferenceNumber} — {Description}",
+            createdBy,
+            VendorId)
+        {
+            ReversalOf = this,
+        };
+
+        foreach (var line in _lines)
+            reversal.AddLine(line.AccountId, line.CreditAmount, line.DebitAmount); // swap sides
+
+        ReversedBy = reversal; // keep the in-memory graph consistent; EF persists via the reversal's FK
+        return reversal;
     }
 
     public decimal TotalDebit => _lines.Sum(l => l.DebitAmount);

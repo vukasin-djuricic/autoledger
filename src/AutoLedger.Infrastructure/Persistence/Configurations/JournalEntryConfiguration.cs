@@ -32,6 +32,14 @@ public sealed class JournalEntryConfiguration : IEntityTypeConfiguration<Journal
             .HasForeignKey(e => e.VendorId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Reversal (storno): a single self-referencing FK on the reversal entry, exposed as two
+        // navigations — ReversalOf (reversal -> original) and its inverse ReversedBy (original ->
+        // reversal). Restrict so a reversed entry can never be deleted out from under its reversal.
+        builder.HasOne(e => e.ReversalOf)
+            .WithOne(e => e.ReversedBy)
+            .HasForeignKey<JournalEntry>(e => e.ReversalOfEntryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Lines are owned by the entry: read-only navigation backed by the _lines field.
         builder.HasMany(e => e.Lines)
             .WithOne()

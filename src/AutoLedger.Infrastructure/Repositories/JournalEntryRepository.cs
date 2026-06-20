@@ -20,6 +20,8 @@ public sealed class JournalEntryRepository : IJournalEntryRepository
             .Include(e => e.Vendor)
             .Include(e => e.Lines)
                 .ThenInclude(l => l.Account)
+            .Include(e => e.ReversalOf)
+            .Include(e => e.ReversedBy)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
     public async Task<PagedResult<JournalEntry>> GetPagedAsync(

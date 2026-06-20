@@ -73,4 +73,22 @@ public sealed class WorkflowEngine
         entry.Reject(reviewedBy, reason);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Reverses a posted entry (storno): creates a linked mirror entry with debits and credits
+    /// swapped, then posts it through the normal transactional path. The original is never edited
+    /// — immutability is preserved — only the reversal link is recorded. Returns the new entry.
+    /// </summary>
+    public async Task<JournalEntry> ReverseAsync(JournalEntry original, string reversedBy, CancellationToken cancellationToken = default)
+    {
+        var reversal = original.CreateReversal(reversedBy); // validates Posted &amp; not already reversed
+        reversal.SetRiskScore(0);
+        reversal.Submit();             // Draft -> PendingReview
+        reversal.Approve(reversedBy);  // PendingReview -> Approved
+
+        await _unitOfWork.JournalEntries.AddAsync(reversal, cancellationToken);
+        await _posting.PostAsync(reversal, cancellationToken); // -> Posted (transactional, links original via EF fixup)
+
+        return reversal;
+    }
 }
