@@ -72,6 +72,36 @@ public sealed class LedgerQueries : ILedgerQueries
         ORDER BY yr, mo;
         """;
 
+    // Income Statement: revenue (credit-normal) and expense (debit-normal) accounts, each net
+    // amount expressed as a positive number on its normal side.
+    private const string IncomeStatementSql = """
+        SELECT a."Code", a."Name", a."Type",
+               SUM(CASE WHEN a."Type" = 'Revenue' THEN l."CreditAmount" - l."DebitAmount"
+                        ELSE l."DebitAmount" - l."CreditAmount" END) AS amount
+        FROM "JournalEntryLines" l
+        JOIN "JournalEntries" e ON e."Id" = l."JournalEntryId"
+        JOIN "Accounts"       a ON a."Id" = l."AccountId"
+        WHERE e."Status" = 'Posted' AND a."Type" IN ('Revenue', 'Expense')
+        GROUP BY a."Id", a."Code", a."Name", a."Type"
+        HAVING SUM(l."DebitAmount" - l."CreditAmount") <> 0
+        ORDER BY a."Type", a."Code";
+        """;
+
+    // Balance Sheet: asset (debit-normal), liability and equity (credit-normal) accounts, each net
+    // amount as a positive number on its normal side.
+    private const string BalanceSheetSql = """
+        SELECT a."Code", a."Name", a."Type",
+               SUM(CASE WHEN a."Type" = 'Asset' THEN l."DebitAmount" - l."CreditAmount"
+                        ELSE l."CreditAmount" - l."DebitAmount" END) AS amount
+        FROM "JournalEntryLines" l
+        JOIN "JournalEntries" e ON e."Id" = l."JournalEntryId"
+        JOIN "Accounts"       a ON a."Id" = l."AccountId"
+        WHERE e."Status" = 'Posted' AND a."Type" IN ('Asset', 'Liability', 'Equity')
+        GROUP BY a."Id", a."Code", a."Name", a."Type"
+        HAVING SUM(l."DebitAmount" - l."CreditAmount") <> 0
+        ORDER BY a."Type", a."Code";
+        """;
+
     public async Task<IReadOnlyList<TrialBalanceRow>> GetTrialBalanceAsync(CancellationToken cancellationToken = default)
     {
         await using var command = await CreateCommandAsync(TrialBalanceSql, cancellationToken);
@@ -110,6 +140,29 @@ public sealed class LedgerQueries : ILedgerQueries
                 reader.GetDecimal(4),
                 reader.GetDecimal(5),
                 reader.GetDecimal(6)));
+        }
+        return rows;
+    }
+
+    public Task<IReadOnlyList<FinancialStatementLine>> GetIncomeStatementAsync(CancellationToken cancellationToken = default)
+        => ReadStatementAsync(IncomeStatementSql, cancellationToken);
+
+    public Task<IReadOnlyList<FinancialStatementLine>> GetBalanceSheetAsync(CancellationToken cancellationToken = default)
+        => ReadStatementAsync(BalanceSheetSql, cancellationToken);
+
+    private async Task<IReadOnlyList<FinancialStatementLine>> ReadStatementAsync(string sql, CancellationToken cancellationToken)
+    {
+        await using var command = await CreateCommandAsync(sql, cancellationToken);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var rows = new List<FinancialStatementLine>();
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            rows.Add(new FinancialStatementLine(
+                reader.GetString(0),
+                reader.GetString(1),
+                Enum.Parse<AccountType>(reader.GetString(2)),
+                reader.GetDecimal(3)));
         }
         return rows;
     }

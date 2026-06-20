@@ -21,6 +21,12 @@ public interface ILedgerQueries
     /// <summary>Income vs expense aggregated by month for the last <paramref name="months"/> months.</summary>
     Task<IReadOnlyList<CashFlowPoint>> GetCashFlowAsync(int months, CancellationToken cancellationToken = default);
 
+    /// <summary>Revenue and expense accounts with their net amounts (the Income Statement / P&amp;L).</summary>
+    Task<IReadOnlyList<FinancialStatementLine>> GetIncomeStatementAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Asset, liability and equity accounts with their net amounts (the Balance Sheet).</summary>
+    Task<IReadOnlyList<FinancialStatementLine>> GetBalanceSheetAsync(CancellationToken cancellationToken = default);
+
     /// <summary>Headline counts for the dashboard KPI cards.</summary>
     Task<DashboardSummary> GetDashboardSummaryAsync(CancellationToken cancellationToken = default);
 }

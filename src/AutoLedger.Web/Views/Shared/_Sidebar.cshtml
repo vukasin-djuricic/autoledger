@@ -2,10 +2,16 @@
 @inject UserManager<ApplicationUser> UserManager
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
     string Cls(string c) => c == controller
         ? "flex items-center gap-3 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900"
         : "flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900";
     string IconCls(string c) => c == controller ? "h-[18px] w-[18px] text-brand-700" : "h-[18px] w-[18px]";
+    // Active by controller AND action (for controllers with several report pages).
+    string ClsA(string c, string a) => (c == controller && a == action)
+        ? "flex items-center gap-3 rounded-lg bg-stone-100 px-3 py-2 font-medium text-stone-900"
+        : "flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900";
+    string IconClsA(string c, string a) => (c == controller && a == action) ? "h-[18px] w-[18px] text-brand-700" : "h-[18px] w-[18px]";
 
     var pending = await JournalEntries.CountByStatusAsync(JournalEntryStatus.PendingReview);
     var me = await UserManager.GetUserAsync(User);
@@ -31,6 +37,10 @@
             <svg class="@IconCls("JournalEntries")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6M9 14h6"/></svg> Journal Entry</a>
         <a href="@Url.Action("Index", "TrialBalance")" class="@Cls("TrialBalance")">
             <svg class="@IconCls("TrialBalance")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Trial Balance</a>
+        <a href="@Url.Action("IncomeStatement", "Reports")" class="@ClsA("Reports", "IncomeStatement")">
+            <svg class="@IconClsA("Reports", "IncomeStatement")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M8 16V9M12 16V6M16 16v-4"/></svg> Income Statement</a>
+        <a href="@Url.Action("BalanceSheet", "Reports")" class="@ClsA("Reports", "BalanceSheet")">
+            <svg class="@IconClsA("Reports", "BalanceSheet")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3v18M3 8h18M5 8l-2 6h4l-2-6zm14 0l-2 6h4l-2-6z"/></svg> Balance Sheet</a>
         <div class="my-2 border-t border-stone-100"></div>
         <a href="@Url.Action("Index", "Transactions", new { status = "PendingReview" })" class="flex items-center justify-between rounded-lg px-3 py-2 font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-900">
             <span class="flex items-center gap-3"><svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg> Approvals</span>

@@ -1,0 +1,66 @@
+@model BalanceSheetViewModel
+@{
+    ViewData["Title"] = "Balance Sheet";
+}
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6">
+        <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Balance Sheet</h1>
+        <p class="mt-1 text-sm text-stone-400">Assets against liabilities and equity, as of all posted entries.</p>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <table class="w-full text-sm">
+            <tbody>
+                <tr class="border-b border-stone-100 bg-stone-50/60 text-[11px] uppercase tracking-wide text-stone-400">
+                    <td class="px-5 py-2.5 font-semibold" colspan="2">Assets</td>
+                </tr>
+                @foreach (var row in Model.Assets)
+                {
+                    <tr class="border-b border-stone-50">
+                        <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.Format(row.Amount)</td>
+                    </tr>
+                }
+                <tr class="border-b border-stone-200 text-sm font-semibold">
+                    <td class="px-5 py-2.5 text-stone-500">Total assets</td>
+                    <td class="px-5 py-2.5 text-right text-stone-900 tnum">@Money.Format(Model.TotalAssets)</td>
+                </tr>
+
+                <tr class="border-b border-stone-100 bg-stone-50/60 text-[11px] uppercase tracking-wide text-stone-400">
+                    <td class="px-5 py-2.5 font-semibold" colspan="2">Liabilities</td>
+                </tr>
+                @foreach (var row in Model.Liabilities)
+                {
+                    <tr class="border-b border-stone-50">
+                        <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.Format(row.Amount)</td>
+                    </tr>
+                }
+
+                <tr class="border-b border-stone-100 bg-stone-50/60 text-[11px] uppercase tracking-wide text-stone-400">
+                    <td class="px-5 py-2.5 font-semibold" colspan="2">Equity</td>
+                </tr>
+                @foreach (var row in Model.Equity)
+                {
+                    <tr class="border-b border-stone-50">
+                        <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.Format(row.Amount)</td>
+                    </tr>
+                }
+                <tr class="border-b border-stone-50">
+                    <td class="px-5 py-3 text-stone-500">Current-period earnings <span class="text-xs text-stone-400">(not yet closed)</span></td>
+                    <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.FormatSigned(Model.CurrentEarnings)</td>
+                </tr>
+                <tr class="border-b border-stone-200 text-sm font-semibold">
+                    <td class="px-5 py-2.5 text-stone-500">Total liabilities &amp; equity</td>
+                    <td class="px-5 py-2.5 text-right text-stone-900 tnum">@Money.Format(Model.TotalLiabilitiesAndEquity)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium @(Model.IsBalanced ? "text-emerald-600" : "text-rose-600")">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        @(Model.IsBalanced ? "Balanced · assets equal liabilities plus equity" : "Out of balance by " + Money.Format(Math.Abs(Model.TotalAssets - Model.TotalLiabilitiesAndEquity)))
+    </p>
+</div>

@@ -27,7 +27,7 @@
     <section class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12">
             <div class="border-b border-stone-100 p-7 md:col-span-5 md:border-b-0 md:border-r">
-                <p class="text-sm font-medium text-stone-400">Net cash flow</p>
+                <p class="text-sm font-medium text-stone-400">Net income</p>
                 <div class="mt-2 flex items-baseline gap-2">
                     <span class="tnum text-[40px] font-semibold leading-none tracking-tight text-stone-900">@Money.Format(Model.NetCashFlow)</span>
                 </div>
@@ -46,14 +46,14 @@
                 <div class="mt-7 space-y-4">
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Money in</span>
+                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Revenue</span>
                             <span class="tnum font-semibold text-stone-900">@Money.Format(Model.MoneyIn)</span>
                         </div>
                         <div class="mt-1.5 h-2 w-full rounded-full bg-stone-100"><div class="h-full rounded-full bg-emerald-500" style="width:@(moneyInPct)%"></div></div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span> Money out</span>
+                            <span class="flex items-center gap-2 font-medium text-stone-600"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span> Expenses</span>
                             <span class="tnum font-semibold text-stone-900">@Money.Format(Model.MoneyOut)</span>
                         </div>
                         <div class="mt-1.5 h-2 w-full rounded-full bg-stone-100"><div class="h-full rounded-full bg-rose-400" style="width:@(moneyOutPct)%"></div></div>
@@ -65,8 +65,8 @@
                 <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-stone-500">Monthly trend</p>
                     <div class="flex items-center gap-4 text-xs text-stone-500">
-                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-emerald-500"></span> In</span>
-                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-rose-300"></span> Out</span>
+                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-emerald-500"></span> Revenue</span>
+                        <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-rose-300"></span> Expenses</span>
                     </div>
                 </div>
                 <div class="mt-6 flex items-end justify-between gap-4" style="height:170px">

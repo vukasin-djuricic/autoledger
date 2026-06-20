@@ -1,0 +1,52 @@
+@model IncomeStatementViewModel
+@{
+    ViewData["Title"] = "Income Statement";
+}
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6">
+        <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Income Statement</h1>
+        <p class="mt-1 text-sm text-stone-400">Revenue less expenses over all posted entries — the profit &amp; loss.</p>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <table class="w-full text-sm">
+            <tbody>
+                <tr class="border-b border-stone-100 bg-stone-50/60 text-[11px] uppercase tracking-wide text-stone-400">
+                    <td class="px-5 py-2.5 font-semibold" colspan="2">Revenue</td>
+                </tr>
+                @foreach (var row in Model.Revenue)
+                {
+                    <tr class="border-b border-stone-50">
+                        <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.Format(row.Amount)</td>
+                    </tr>
+                }
+                <tr class="border-b border-stone-100 text-sm font-semibold">
+                    <td class="px-5 py-2.5 text-stone-500">Total revenue</td>
+                    <td class="px-5 py-2.5 text-right text-stone-900 tnum">@Money.Format(Model.TotalRevenue)</td>
+                </tr>
+
+                <tr class="border-b border-stone-100 bg-stone-50/60 text-[11px] uppercase tracking-wide text-stone-400">
+                    <td class="px-5 py-2.5 font-semibold" colspan="2">Expenses</td>
+                </tr>
+                @foreach (var row in Model.Expenses)
+                {
+                    <tr class="border-b border-stone-50">
+                        <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <td class="px-5 py-3 text-right tnum font-medium text-stone-800">@Money.Format(row.Amount)</td>
+                    </tr>
+                }
+                <tr class="border-b border-stone-100 text-sm font-semibold">
+                    <td class="px-5 py-2.5 text-stone-500">Total expenses</td>
+                    <td class="px-5 py-2.5 text-right text-stone-900 tnum">@Money.Format(Model.TotalExpenses)</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="bg-stone-50/70 text-base font-semibold @(Model.NetIncome >= 0 ? "text-emerald-700" : "text-rose-700")">
+                    <td class="px-5 py-4">Net @(Model.NetIncome >= 0 ? "income" : "loss")</td>
+                    <td class="px-5 py-4 text-right tnum">@Money.FormatSigned(Model.NetIncome)</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
