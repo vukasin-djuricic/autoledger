@@ -48,6 +48,26 @@ public static class DbSeeder
             db.FiscalPeriods.Add(new FiscalPeriod(2026, month));
     }
 
+    /// <summary>
+    /// Wipes all application data (keeping users/roles) and reseeds it — lets a reviewer experience
+    /// the full lifecycle from a clean slate. Deletes in FK-safe order; reversal entries (which
+    /// self-reference their original) are removed before the rest.
+    /// </summary>
+    public static async Task ResetAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+    {
+        var db = services.GetRequiredService<AppDbContext>();
+
+        await db.AuditLogs.ExecuteDeleteAsync(cancellationToken);
+        await db.JournalEntryLines.ExecuteDeleteAsync(cancellationToken);
+        await db.JournalEntries.Where(e => e.ReversalOfEntryId != null).ExecuteDeleteAsync(cancellationToken);
+        await db.JournalEntries.ExecuteDeleteAsync(cancellationToken);
+        await db.FiscalPeriods.ExecuteDeleteAsync(cancellationToken);
+        await db.Vendors.ExecuteDeleteAsync(cancellationToken);
+        await db.Accounts.ExecuteDeleteAsync(cancellationToken);
+
+        await SeedAsync(services, cancellationToken);
+    }
+
     private static async Task SeedRolesAndUsersAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();

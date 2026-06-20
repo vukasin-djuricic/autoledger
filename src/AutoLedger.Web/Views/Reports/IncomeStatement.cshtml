@@ -8,6 +8,15 @@
         <p class="mt-1 text-sm text-stone-400">Revenue less expenses over all posted entries — the profit &amp; loss.</p>
     </div>
 
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="rounded-2xl border border-stone-200/80 bg-white px-6 py-16 text-center shadow-sm">
+            <h3 class="text-base font-semibold text-stone-800">No revenue or expenses yet</h3>
+            <p class="mt-1 text-sm text-stone-400">The income statement appears once revenue or expense entries are posted.</p>
+        </div>
+        return;
+    }
+
     <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
         <table class="w-full text-sm">
             <tbody>

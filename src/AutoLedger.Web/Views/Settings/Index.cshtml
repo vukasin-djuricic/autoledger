@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Settings";
+    var isController = User.IsInRole(Roles.Controller);
+}
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6">
+        <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Settings</h1>
+        <p class="mt-1 text-sm text-stone-400">Demo administration.</p>
+    </div>
+
+    @if (TempData["Message"] is string msg)
+    {
+        <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700">@msg</div>
+    }
+
+    <div class="flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white px-6 py-5 shadow-sm">
+        <div>
+            <h3 class="text-sm font-semibold text-stone-700">Reset demo data</h3>
+            <p class="mt-0.5 text-xs text-stone-400">Wipes all entries, accounts, vendors and periods, then reseeds the original demo dataset. Sign-in accounts are kept.</p>
+        </div>
+        @if (isController)
+        {
+            <form asp-action="ResetDemoData" method="post" onsubmit="return confirm('Reset all demo data to its seeded state? This cannot be undone.');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.5 2.7L3 8"/><path d="M3 3v5h5"/></svg> Reset demo data
+                </button>
+            </form>
+        }
+        else
+        {
+            <span class="shrink-0 text-xs text-stone-400">Controller only</span>
+        }
+    </div>
+</div>
