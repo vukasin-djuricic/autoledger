@@ -25,6 +25,29 @@ opening a *Pending Review* entry to **Approve/Post or Reject** (Controller only)
 Entry** form (live debit = credit balancing), and **Trial Balance** (the books tie out).
 
 > First request may take a few seconds — the machine cold-starts from idle to keep hosting free.
+
+## 📸 Screenshots
+
+**Dashboard** — net cash flow, monthly income/expense trend, KPIs (pending approvals, auto-posting rate) and a "needs your review" queue.
+
+![Dashboard](res/screenshots/dashboard.png)
+
+**Transactions** — paginated grid, filterable by status (Draft / Pending / Approved / Posted / Rejected).
+
+![Transactions](res/screenshots/transactions.png)
+
+**New Journal Entry** — double-entry form with live debit = credit balancing; submit stays disabled until the entry balances.
+
+![New Journal Entry](res/screenshots/journalentry.png)
+
+**Review & approval** — a flagged entry with its risk score and line detail; a Controller can Approve & Post or Reject.
+
+![Approval](res/screenshots/approvals.png)
+
+**Trial Balance** — per-account net balances proving total debit equals total credit.
+
+![Trial Balance](res/screenshots/trialbalance.png)
+
 > The original design blueprint and the static UI mockups it was built from live in [`design/`](design/).
 
 ## Tech stack
