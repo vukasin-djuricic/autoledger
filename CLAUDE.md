@@ -1,4 +1,6 @@
-# AutoLedger — context for Claude Code
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 A B2B General Ledger ERP web app with an automated risk-approval workflow. It is a **CV/portfolio
 project** (target roles: ERP/.NET, e.g. Acumatica). Built from a static design (`design/*.html`)
@@ -20,14 +22,29 @@ into a full-stack app.
 
 ## Architecture (3 layers, maps to the job spec)
 - `src/AutoLedger.Domain` — entities, enums, **State pattern** (`States/`), **Strategy pattern**
-  risk (`Risk/`), services (`PostingService`, `RiskAssessmentService`, `WorkflowEngine`), interfaces
-  (`Abstractions/`). No infrastructure dependencies.
+  risk (`Risk/`), services (`PostingService`, `RiskAssessmentService`, `WorkflowEngine`,
+  `YearEndCloseService`), interfaces (`Abstractions/`). No infrastructure dependencies.
 - `src/AutoLedger.Infrastructure` — EF Core 9 + Npgsql, repositories + Unit of Work, raw-SQL
   analytics (`Queries/`), audit `SaveChanges` interceptor, `xmin` optimistic concurrency, Identity,
   `DbSeeder`.
 - `src/AutoLedger.Web` — ASP.NET Core MVC, Razor views/partials ported from `design/`, view
   components, Identity (roles `Clerk`/`Controller`), compiled Tailwind.
 - `tests/AutoLedger.Tests` — xUnit (double-entry, state machine, risk strategies, posting/rollback).
+
+**Where the patterns converge:** `WorkflowEngine.SubmitAsync` is the orchestration entry point — it
+scores risk (Strategy), drives `JournalEntry` through its lifecycle (State), and posts atomically
+(Unit of Work). Low-risk entries auto-approve & post; risky ones stop at `PendingReview` for a
+controller. Start here to understand how a transaction flows end to end.
+
+**Accounting-cycle features:** posted entries are immutable — corrections go through
+`WorkflowEngine.ReverseAsync` (storno; self-FK `ReversalOf`/`ReversedBy`). Rejected entries can be
+reopened to Draft and resubmitted. `PostingService` blocks posting into a **closed `FiscalPeriod`**
+(so reversals and year-end close respect the lock too). `YearEndCloseService` zeroes P&L accounts
+into Retained Earnings (`3200`). Reports (Income Statement, Balance Sheet, account-ledger drill-down)
+are raw SQL in `LedgerQueries`. `DbSeeder.ResetAsync` wipes + reseeds for the Settings reset button.
+
+**Non-goals (deliberate scope):** no AP/AR sub-ledgers (open-item/aging), no multi-currency/FX, no
+multi-tenancy. Keep these out unless explicitly asked.
 
 ## Common commands (run via Docker)
 ```bash
@@ -37,6 +54,10 @@ docker compose up --build            # → http://localhost:8080
 # build / test
 docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/dotnet/sdk:9.0 dotnet build AutoLedger.sln
 docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/dotnet/sdk:9.0 dotnet test
+
+# run a single test / class (filter by fully-qualified name or method)
+docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/dotnet/sdk:9.0 \
+  dotnet test --filter "FullyQualifiedName~JournalEntryTests"
 
 # EF migration
 docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/dotnet/sdk:9.0 \

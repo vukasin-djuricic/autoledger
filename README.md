@@ -20,9 +20,12 @@ On the sign-in page click **“Sign in as Controller”** (can approve/reject) o
 | **Controller** | `controller@autoledger.local` | `Passw0rd!` |
 | **Clerk** | `clerk@autoledger.local` | `Passw0rd!` |
 
-**Worth a look:** the **Dashboard** (cash-flow chart + KPIs), **Transactions** (filter by status),
-opening a *Pending Review* entry to **Approve/Post or Reject** (Controller only), the **New Journal
-Entry** form (live debit = credit balancing), and **Trial Balance** (the books tie out).
+**Worth a look:** the **Dashboard** (income-vs-expense chart + KPIs), **Transactions** (filter by
+status), opening a *Pending Review* entry to **Approve/Post or Reject** (Controller only), the **New
+Journal Entry** form (live debit = credit balancing), **reversing** a posted entry (storno),
+**editing/resubmitting** a rejected entry, the **Trial Balance** with **per-account drill-down**, the
+**Income Statement** and **Balance Sheet**, **Fiscal Periods** (close a month to lock posting),
+**year-end close** to Retained Earnings, and **Chart of Accounts / Vendors** management.
 
 > First request may take a few seconds — the machine cold-starts from idle to keep hosting free.
 
@@ -92,9 +95,26 @@ Dependencies point inward: `Web → Infrastructure → Domain`. Repository/query
 
 1. **Trial Balance** — joins lines + accounts, `GROUP BY` account, `CASE WHEN` to place each net
    balance on the correct debit/credit side; total debit must equal total credit.
-2. **Cash Flow** — income vs expense bucketed by month (`date_trunc`) for the dashboard chart.
-3. **Vendor risk statistics** — `AVG` + `STDDEV_POP` over a vendor's prior posted entries, feeding
+2. **Income Statement / Balance Sheet** — conditional aggregation by account type; the balance sheet
+   ties out by folding the unclosed current-period earnings into equity.
+3. **Account ledger drill-down** — every posted line for one account with a running balance via a
+   `SUM(...) OVER (...)` window function, signed to the account's normal side.
+4. **Income vs expense by month** — bucketed by month for the dashboard chart.
+5. **Vendor risk statistics** — `AVG` + `STDDEV_POP` over a vendor's prior posted entries, feeding
    the deviation risk strategy.
+
+### Accounting cycle
+
+Posted entries are immutable: corrections are made with **reversing entries** (storno) that link back
+to the original. **Fiscal periods** can be closed to lock a month against further posting, and a
+**year-end close** zeroes revenue/expense into Retained Earnings — so the ledger models the full
+accounting cycle, not just single entries.
+
+### Scope & non-goals
+
+Deliberately out of scope to keep the project focused: AP/AR sub-ledgers (open-item tracking and
+aging), multi-currency / FX, and multi-tenancy. The accounts payable/receivable lines are modelled as
+plain GL accounts.
 
 ## Running locally (Docker only — nothing to install)
 
