@@ -8,6 +8,8 @@ namespace AutoLedger.Domain.Abstractions;
 public interface IUnitOfWork
 {
     IJournalEntryRepository JournalEntries { get; }
+    IAccountRepository Accounts { get; }
+    IVendorRepository Vendors { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

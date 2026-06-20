@@ -16,6 +16,9 @@ public class Account
 
     public AccountType Type { get; private set; }
 
+    /// <summary>Inactive accounts are hidden from new entries but kept for posted history.</summary>
+    public bool IsActive { get; private set; } = true;
+
     private Account() { } // EF
 
     public Account(string code, string name, AccountType type)
@@ -31,4 +34,15 @@ public class Account
     /// </summary>
     public bool NormalBalanceIsDebit =>
         Type is AccountType.Asset or AccountType.Expense;
+
+    /// <summary>Renames the account. The code and type stay fixed once created.</summary>
+    public void Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Account name is required.", nameof(name));
+        Name = name.Trim();
+    }
+
+    public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
 }

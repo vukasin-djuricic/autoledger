@@ -49,6 +49,11 @@
                 <span class="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 tnum">@pending</span>
             }
         </a>
+        <div class="my-2 border-t border-stone-100"></div>
+        <a href="@Url.Action("Index", "Accounts")" class="@Cls("Accounts")">
+            <svg class="@IconCls("Accounts")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="0.5" fill="currentColor"/></svg> Chart of Accounts</a>
+        <a href="@Url.Action("Index", "Vendors")" class="@Cls("Vendors")">
+            <svg class="@IconCls("Vendors")" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9h.01M9 13h.01M9 17h.01"/></svg> Vendors</a>
     </nav>
     <div class="p-3">
         <div class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-stone-50">

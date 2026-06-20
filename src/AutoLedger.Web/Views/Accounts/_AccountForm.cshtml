@@ -1,0 +1,47 @@
+@model AccountFormViewModel
+<form asp-action="@(Model.IsEdit ? "Edit" : "Create")" method="post" class="max-w-lg">
+    @Html.AntiForgeryToken()
+    @if (Model.IsEdit)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <div asp-validation-summary="ModelOnly" class="mb-4 rounded-lg bg-rose-50 px-4 py-2.5 text-sm text-rose-700 empty:hidden"></div>
+
+    <div class="space-y-4">
+        <div>
+            <label asp-for="Code" class="mb-1.5 block text-xs font-medium text-stone-500">Account code</label>
+            @if (Model.IsEdit)
+            {
+                <input type="hidden" asp-for="Code" />
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-500 tnum">@Model.Code</div>
+            }
+            else
+            {
+                <input asp-for="Code" placeholder="e.g. 5300" class="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 tnum focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+                <span asp-validation-for="Code" class="mt-1 block text-xs text-rose-600"></span>
+            }
+        </div>
+        <div>
+            <label asp-for="Name" class="mb-1.5 block text-xs font-medium text-stone-500">Name</label>
+            <input asp-for="Name" placeholder="e.g. Marketing Expense" class="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+            <span asp-validation-for="Name" class="mt-1 block text-xs text-rose-600"></span>
+        </div>
+        <div>
+            <label asp-for="Type" class="mb-1.5 block text-xs font-medium text-stone-500">Type</label>
+            @if (Model.IsEdit)
+            {
+                <input type="hidden" asp-for="Type" />
+                <div class="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-500">@Model.Type</div>
+            }
+            else
+            {
+                <select asp-for="Type" asp-items="Html.GetEnumSelectList<AutoLedger.Domain.Enums.AccountType>()" class="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"></select>
+            }
+        </div>
+    </div>
+
+    <div class="mt-6 flex items-center justify-end gap-2">
+        <a href="@Url.Action("Index")" class="rounded-lg px-4 py-2 text-sm font-medium text-stone-500 hover:bg-stone-100">Cancel</a>
+        <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">@(Model.IsEdit ? "Save changes" : "Create account")</button>
+    </div>
+</form>

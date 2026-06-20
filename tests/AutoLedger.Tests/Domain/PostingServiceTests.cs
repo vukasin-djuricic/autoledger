@@ -53,6 +53,8 @@ public class PostingServiceTests
         public FakeTransaction? Transaction { get; private set; }
 
         public IJournalEntryRepository JournalEntries => throw new NotSupportedException();
+        public IAccountRepository Accounts => throw new NotSupportedException();
+        public IVendorRepository Vendors => throw new NotSupportedException();
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

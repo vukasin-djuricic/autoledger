@@ -1,0 +1,20 @@
+@model VendorFormViewModel
+<form asp-action="@(Model.IsEdit ? "Edit" : "Create")" method="post" class="max-w-lg">
+    @Html.AntiForgeryToken()
+    @if (Model.IsEdit)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <div asp-validation-summary="ModelOnly" class="mb-4 rounded-lg bg-rose-50 px-4 py-2.5 text-sm text-rose-700 empty:hidden"></div>
+
+    <div>
+        <label asp-for="Name" class="mb-1.5 block text-xs font-medium text-stone-500">Vendor name</label>
+        <input asp-for="Name" placeholder="e.g. Northwind Traders" class="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+        <span asp-validation-for="Name" class="mt-1 block text-xs text-rose-600"></span>
+    </div>
+
+    <div class="mt-6 flex items-center justify-end gap-2">
+        <a href="@Url.Action("Index")" class="rounded-lg px-4 py-2 text-sm font-medium text-stone-500 hover:bg-stone-100">Cancel</a>
+        <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">@(Model.IsEdit ? "Save changes" : "Create vendor")</button>
+    </div>
+</form>

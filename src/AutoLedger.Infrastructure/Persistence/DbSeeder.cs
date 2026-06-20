@@ -78,6 +78,7 @@ public static class DbSeeder
             new Account("1700", "Accumulated Depreciation", AccountType.Asset),
             new Account("2100", "Accounts Payable", AccountType.Liability),
             new Account("2300", "Output VAT Payable", AccountType.Liability),
+            new Account("3200", "Retained Earnings", AccountType.Equity),
             new Account("4000", "Sales Revenue", AccountType.Revenue),
             new Account("5100", "Rent Expense", AccountType.Expense),
             new Account("5200", "Office Expenses", AccountType.Expense),

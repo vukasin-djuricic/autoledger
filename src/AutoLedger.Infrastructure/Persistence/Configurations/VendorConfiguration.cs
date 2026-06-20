@@ -11,6 +11,7 @@ public sealed class VendorConfiguration : IEntityTypeConfiguration<Vendor>
         builder.ToTable("Vendors");
         builder.HasKey(v => v.Id);
         builder.Property(v => v.Name).HasMaxLength(200).IsRequired();
+        builder.Property(v => v.IsActive).HasDefaultValue(true);
         builder.HasIndex(v => v.Name);
     }
 }

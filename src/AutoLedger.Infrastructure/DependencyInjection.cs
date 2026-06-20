@@ -29,6 +29,8 @@ public static class DependencyInjection
 
         // Data access
         services.AddScoped<IJournalEntryRepository, JournalEntryRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IVendorRepository, VendorRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ILedgerQueries, LedgerQueries>();
         services.AddScoped<IVendorStatisticsProvider, VendorStatisticsProvider>();

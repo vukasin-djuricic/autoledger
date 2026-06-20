@@ -13,6 +13,7 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.Code).HasMaxLength(10).IsRequired();
         builder.Property(a => a.Name).HasMaxLength(200).IsRequired();
         builder.Property(a => a.Type).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(a => a.IsActive).HasDefaultValue(true);
         builder.HasIndex(a => a.Code).IsUnique();
     }
 }

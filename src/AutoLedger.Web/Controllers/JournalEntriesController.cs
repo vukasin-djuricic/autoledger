@@ -260,11 +260,13 @@ public class JournalEntriesController : Controller
     private async Task PopulateOptionsAsync(CreateJournalEntryViewModel model, CancellationToken cancellationToken)
     {
         model.AccountOptions = await _db.Accounts
+            .Where(a => a.IsActive)
             .OrderBy(a => a.Code)
             .Select(a => new SelectListItem($"{a.Code} · {a.Name}", a.Id.ToString()))
             .ToListAsync(cancellationToken);
 
         model.VendorOptions = await _db.Vendors
+            .Where(v => v.IsActive)
             .OrderBy(v => v.Name)
             .Select(v => new SelectListItem(v.Name, v.Id.ToString()))
             .ToListAsync(cancellationToken);
