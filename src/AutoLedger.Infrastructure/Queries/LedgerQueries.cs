@@ -102,6 +102,20 @@ public sealed class LedgerQueries : ILedgerQueries
         ORDER BY a."Type", a."Code";
         """;
 
+    // Per-account revenue/expense net for one fiscal year — input to the year-end closing entry.
+    private const string YearProfitAndLossSql = """
+        SELECT a."Id", a."Type",
+               SUM(CASE WHEN a."Type" = 'Revenue' THEN l."CreditAmount" - l."DebitAmount"
+                        ELSE l."DebitAmount" - l."CreditAmount" END) AS amount
+        FROM "JournalEntryLines" l
+        JOIN "JournalEntries" e ON e."Id" = l."JournalEntryId"
+        JOIN "Accounts"       a ON a."Id" = l."AccountId"
+        WHERE e."Status" = 'Posted' AND a."Type" IN ('Revenue', 'Expense')
+              AND EXTRACT(YEAR FROM e."Date") = @year
+        GROUP BY a."Id", a."Type"
+        HAVING SUM(l."DebitAmount" - l."CreditAmount") <> 0;
+        """;
+
     public async Task<IReadOnlyList<TrialBalanceRow>> GetTrialBalanceAsync(CancellationToken cancellationToken = default)
     {
         await using var command = await CreateCommandAsync(TrialBalanceSql, cancellationToken);
@@ -149,6 +163,23 @@ public sealed class LedgerQueries : ILedgerQueries
 
     public Task<IReadOnlyList<FinancialStatementLine>> GetBalanceSheetAsync(CancellationToken cancellationToken = default)
         => ReadStatementAsync(BalanceSheetSql, cancellationToken);
+
+    public async Task<IReadOnlyList<AccountBalance>> GetYearProfitAndLossByAccountAsync(int year, CancellationToken cancellationToken = default)
+    {
+        await using var command = await CreateCommandAsync(YearProfitAndLossSql, cancellationToken);
+        AddParameter(command, "year", year);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var rows = new List<AccountBalance>();
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            rows.Add(new AccountBalance(
+                reader.GetInt32(0),
+                Enum.Parse<AccountType>(reader.GetString(1)),
+                reader.GetDecimal(2)));
+        }
+        return rows;
+    }
 
     private async Task<IReadOnlyList<FinancialStatementLine>> ReadStatementAsync(string sql, CancellationToken cancellationToken)
     {

@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Fiscal Periods";
     var isController = User.IsInRole(Roles.Controller);
+    var closeYear = Model.Count > 0 ? Model.Max(p => p.Year) : DateTime.UtcNow.Year;
 }
 <div class="mx-auto max-w-2xl">
     <div class="mb-6">
@@ -64,4 +65,21 @@
             </table>
         </div>
     </div>
+
+    @if (isController)
+    {
+        <div class="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white px-6 py-4 shadow-sm">
+            <div>
+                <h3 class="text-sm font-semibold text-stone-700">Year-end close · @closeYear</h3>
+                <p class="text-xs text-stone-400">Zeroes revenue and expense accounts into Retained Earnings.</p>
+            </div>
+            <form asp-action="CloseYear" method="post" onsubmit="return confirm('Run year-end close for @closeYear? This posts a closing entry to Retained Earnings.');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="year" value="@closeYear" />
+                <button type="submit" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Run year-end close
+                </button>
+            </form>
+        </div>
+    }
 </div>

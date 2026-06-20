@@ -16,6 +16,9 @@ public interface IJournalEntryRepository
         JournalEntryStatus? status, int page, int pageSize, CancellationToken cancellationToken = default);
 
     Task<int> CountByStatusAsync(JournalEntryStatus status, CancellationToken cancellationToken = default);
+
+    /// <summary>True if an entry with the given reference number already exists.</summary>
+    Task<bool> ReferenceExistsAsync(string reference, CancellationToken cancellationToken = default);
 }
 
 /// <summary>A page of results plus the total count for pagination UI.</summary>

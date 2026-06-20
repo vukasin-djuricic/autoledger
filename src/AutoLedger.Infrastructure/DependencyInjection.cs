@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<RiskAssessmentService>();
         services.AddScoped<PostingService>();
         services.AddScoped<WorkflowEngine>();
+        services.AddScoped<YearEndCloseService>();
 
         return services;
     }

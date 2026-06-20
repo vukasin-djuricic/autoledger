@@ -27,6 +27,12 @@ public interface ILedgerQueries
     /// <summary>Asset, liability and equity accounts with their net amounts (the Balance Sheet).</summary>
     Task<IReadOnlyList<FinancialStatementLine>> GetBalanceSheetAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Net balance per revenue/expense account (positive on its normal side) for a fiscal year —
+    /// the input to the year-end closing entry.
+    /// </summary>
+    Task<IReadOnlyList<AccountBalance>> GetYearProfitAndLossByAccountAsync(int year, CancellationToken cancellationToken = default);
+
     /// <summary>Headline counts for the dashboard KPI cards.</summary>
     Task<DashboardSummary> GetDashboardSummaryAsync(CancellationToken cancellationToken = default);
 }

@@ -51,4 +51,7 @@ public sealed class JournalEntryRepository : IJournalEntryRepository
 
     public Task<int> CountByStatusAsync(JournalEntryStatus status, CancellationToken cancellationToken = default)
         => _db.JournalEntries.CountAsync(e => e.Status == status, cancellationToken);
+
+    public Task<bool> ReferenceExistsAsync(string reference, CancellationToken cancellationToken = default)
+        => _db.JournalEntries.AnyAsync(e => e.ReferenceNumber == reference, cancellationToken);
 }
