@@ -82,7 +82,16 @@ public class JournalEntriesController : Controller
     public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
     {
         var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id, cancellationToken);
-        return entry is null ? NotFound() : View(entry);
+        if (entry is null) return NotFound();
+
+        var entityId = id.ToString();
+        var history = await _db.AuditLogs
+            .AsNoTracking()
+            .Where(a => a.EntityName == nameof(JournalEntry) && a.EntityId == entityId)
+            .OrderBy(a => a.Timestamp).ThenBy(a => a.Id)
+            .ToListAsync(cancellationToken);
+
+        return View(new JournalEntryDetailsViewModel { Entry = entry, History = history });
     }
 
     [HttpGet]
