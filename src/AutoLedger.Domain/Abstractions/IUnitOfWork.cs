@@ -10,6 +10,7 @@ public interface IUnitOfWork
     IJournalEntryRepository JournalEntries { get; }
     IAccountRepository Accounts { get; }
     IVendorRepository Vendors { get; }
+    IFiscalPeriodRepository FiscalPeriods { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

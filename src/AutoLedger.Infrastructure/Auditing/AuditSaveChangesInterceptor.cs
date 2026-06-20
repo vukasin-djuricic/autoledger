@@ -16,7 +16,7 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private static readonly HashSet<Type> Audited = new()
     {
-        typeof(Account), typeof(Vendor), typeof(JournalEntry), typeof(JournalEntryLine)
+        typeof(Account), typeof(Vendor), typeof(JournalEntry), typeof(JournalEntryLine), typeof(FiscalPeriod)
     };
 
     private readonly ICurrentUserAccessor _currentUser;

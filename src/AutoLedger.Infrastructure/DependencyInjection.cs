@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IJournalEntryRepository, JournalEntryRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IVendorRepository, VendorRepository>();
+        services.AddScoped<IFiscalPeriodRepository, FiscalPeriodRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ILedgerQueries, LedgerQueries>();
         services.AddScoped<IVendorStatisticsProvider, VendorStatisticsProvider>();

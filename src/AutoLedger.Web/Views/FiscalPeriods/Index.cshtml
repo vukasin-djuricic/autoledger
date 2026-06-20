@@ -1,0 +1,67 @@
+@model IReadOnlyList<FiscalPeriod>
+@{
+    ViewData["Title"] = "Fiscal Periods";
+    var isController = User.IsInRole(Roles.Controller);
+}
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6">
+        <h1 class="text-[26px] font-semibold tracking-tight text-stone-900">Fiscal Periods</h1>
+        <p class="mt-1 text-sm text-stone-400">Closing a period locks it — no entries can be posted into a closed month.</p>
+    </div>
+
+    @if (TempData["Error"] is string err)
+    {
+        <div class="mb-4 rounded-lg bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700">@err</div>
+    }
+    @if (TempData["Message"] is string msg)
+    {
+        <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700">@msg</div>
+    }
+
+    <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-stone-100 text-left text-[11px] uppercase tracking-wide text-stone-400">
+                        <th class="px-5 py-3 font-semibold">Period</th>
+                        <th class="px-5 py-3 font-semibold">Status</th>
+                        @if (isController) { <th class="px-5 py-3"></th> }
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-50">
+                    @if (Model.Count == 0)
+                    {
+                        <tr><td colspan="3" class="px-5 py-10 text-center text-sm text-stone-400">No fiscal periods defined.</td></tr>
+                    }
+                    @foreach (var p in Model)
+                    {
+                        <tr class="hover:bg-stone-50">
+                            <td class="px-5 py-3 font-medium text-stone-800">@p.Label</td>
+                            <td class="px-5 py-3">
+                                @if (p.IsClosed)
+                                {
+                                    <span class="rounded-full bg-stone-200 px-2 py-0.5 text-[11px] font-semibold text-stone-600">Closed</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Open</span>
+                                }
+                            </td>
+                            @if (isController)
+                            {
+                                <td class="px-5 py-3 text-right">
+                                    <form asp-action="@(p.IsClosed ? "Reopen" : "Close")" method="post" class="inline"
+                                          onsubmit="return confirm('@(p.IsClosed ? "Reopen" : "Close") @p.Label?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="font-medium @(p.IsClosed ? "text-stone-400 hover:text-stone-700" : "text-rose-500 hover:text-rose-700")">@(p.IsClosed ? "Reopen" : "Close")</button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

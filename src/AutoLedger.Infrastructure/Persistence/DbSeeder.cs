@@ -34,8 +34,18 @@ public static class DbSeeder
         var vendors = SeedVendors(db);
         await db.SaveChangesAsync(cancellationToken);
 
+        SeedFiscalPeriods(db);
+        await db.SaveChangesAsync(cancellationToken);
+
         SeedJournalEntries(db, accounts, vendors);
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void SeedFiscalPeriods(AppDbContext db)
+    {
+        // The 2026 periods the demo data falls in — all open so entries can be posted.
+        for (var month = 1; month <= 6; month++)
+            db.FiscalPeriods.Add(new FiscalPeriod(2026, month));
     }
 
     private static async Task SeedRolesAndUsersAsync(IServiceProvider services)
