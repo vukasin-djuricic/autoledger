@@ -22,8 +22,8 @@
                 <tbody class="divide-y divide-stone-50">
                     @foreach (var row in Model.Rows)
                     {
-                        <tr class="hover:bg-stone-50">
-                            <td class="px-5 py-3"><span class="font-medium text-stone-800 tnum">@row.AccountCode</span> <span class="text-stone-500">@row.AccountName</span></td>
+                        <tr class="cursor-pointer hover:bg-stone-50" onclick="location.href='@Url.Action("Ledger", new { accountId = row.AccountId })'">
+                            <td class="px-5 py-3"><a href="@Url.Action("Ledger", new { accountId = row.AccountId })" class="font-medium text-stone-800 tnum hover:text-brand-700">@row.AccountCode</a> <span class="text-stone-500">@row.AccountName</span></td>
                             <td class="px-5 py-3 text-stone-400">@row.AccountType</td>
                             <td class="px-5 py-3 text-right tnum @(row.Debit > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(row.Debit > 0 ? Money.Format(row.Debit) : "—")</td>
                             <td class="px-5 py-3 text-right tnum @(row.Credit > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(row.Credit > 0 ? Money.Format(row.Credit) : "—")</td>

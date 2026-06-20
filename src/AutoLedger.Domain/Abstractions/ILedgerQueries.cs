@@ -11,6 +11,13 @@ public interface ILedgerQueries
     /// <summary>Per-account net debit/credit totals over all posted entries.</summary>
     Task<IReadOnlyList<TrialBalanceRow>> GetTrialBalanceAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Every posted line for one account, oldest first, with a running balance signed to the
+    /// account's normal side. Drill-down from a Trial Balance row.
+    /// </summary>
+    Task<IReadOnlyList<AccountLedgerRow>> GetAccountLedgerAsync(
+        int accountId, bool normalBalanceIsDebit, CancellationToken cancellationToken = default);
+
     /// <summary>Income vs expense aggregated by month for the last <paramref name="months"/> months.</summary>
     Task<IReadOnlyList<CashFlowPoint>> GetCashFlowAsync(int months, CancellationToken cancellationToken = default);
 

@@ -23,7 +23,8 @@ public sealed class LedgerQueries : ILedgerQueries
     // Trial Balance: each account's net movement placed on the correct side via CASE WHEN.
     // Across all accounts, total debit must equal total credit — proving the books balance.
     private const string TrialBalanceSql = """
-        SELECT a."Code"  AS account_code,
+        SELECT a."Id"    AS account_id,
+               a."Code"  AS account_code,
                a."Name"  AS account_name,
                a."Type"  AS account_type,
                CASE WHEN SUM(l."DebitAmount" - l."CreditAmount") >= 0
@@ -36,6 +37,23 @@ public sealed class LedgerQueries : ILedgerQueries
         WHERE e."Status" = 'Posted'
         GROUP BY a."Id", a."Code", a."Name", a."Type"
         ORDER BY a."Code";
+        """;
+
+    // Account ledger (drill-down): every posted line for one account, oldest first, with a running
+    // balance signed to the account's normal side via @sign (+1 for debit-normal, -1 for credit-normal).
+    private const string AccountLedgerSql = """
+        SELECT e."Id"              AS entry_id,
+               e."Date"            AS dt,
+               e."ReferenceNumber" AS reference,
+               e."Description"     AS description,
+               l."DebitAmount"     AS debit,
+               l."CreditAmount"    AS credit,
+               SUM((l."DebitAmount" - l."CreditAmount") * @sign)
+                   OVER (ORDER BY e."Date", e."Id", l."Id") AS running
+        FROM "JournalEntryLines" l
+        JOIN "JournalEntries" e ON e."Id" = l."JournalEntryId"
+        WHERE l."AccountId" = @accountId AND e."Status" = 'Posted'
+        ORDER BY e."Date", e."Id", l."Id";
         """;
 
     // Cash Flow: revenue in vs expenses out, bucketed by calendar month over a recent window.
@@ -63,11 +81,35 @@ public sealed class LedgerQueries : ILedgerQueries
         while (await reader.ReadAsync(cancellationToken))
         {
             rows.Add(new TrialBalanceRow(
-                reader.GetString(0),
+                reader.GetInt32(0),
                 reader.GetString(1),
-                Enum.Parse<AccountType>(reader.GetString(2)),
-                reader.GetDecimal(3),
-                reader.GetDecimal(4)));
+                reader.GetString(2),
+                Enum.Parse<AccountType>(reader.GetString(3)),
+                reader.GetDecimal(4),
+                reader.GetDecimal(5)));
+        }
+        return rows;
+    }
+
+    public async Task<IReadOnlyList<AccountLedgerRow>> GetAccountLedgerAsync(
+        int accountId, bool normalBalanceIsDebit, CancellationToken cancellationToken = default)
+    {
+        await using var command = await CreateCommandAsync(AccountLedgerSql, cancellationToken);
+        AddParameter(command, "accountId", accountId);
+        AddParameter(command, "sign", normalBalanceIsDebit ? 1 : -1);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var rows = new List<AccountLedgerRow>();
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            rows.Add(new AccountLedgerRow(
+                reader.GetInt32(0),
+                reader.GetFieldValue<DateOnly>(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetDecimal(4),
+                reader.GetDecimal(5),
+                reader.GetDecimal(6)));
         }
         return rows;
     }

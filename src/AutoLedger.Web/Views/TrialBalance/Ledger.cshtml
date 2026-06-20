@@ -1,0 +1,59 @@
+@model AccountLedgerViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = $"{Model.Code} · {Model.Name}";
+}
+<div class="mx-auto max-w-3xl">
+    <a href="@Url.Action("Index")" class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-stone-400 hover:text-stone-600">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg> Back to trial balance
+    </a>
+
+    <div class="mb-6">
+        <div class="flex items-center gap-2.5">
+            <h1 class="text-[26px] font-semibold tracking-tight text-stone-900 tnum">@Model.Code</h1>
+            <span class="text-[26px] font-semibold tracking-tight text-stone-400">@Model.Name</span>
+        </div>
+        <p class="mt-1 text-sm text-stone-400">@Model.Type · posted lines, oldest first · running balance on the @(Model.NormalBalanceIsDebit ? "debit" : "credit") side.</p>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-stone-100 text-left text-[11px] uppercase tracking-wide text-stone-400">
+                        <th class="px-5 py-3 font-semibold">Date</th>
+                        <th class="px-5 py-3 font-semibold">Entry</th>
+                        <th class="px-5 py-3 font-semibold text-right">Debit</th>
+                        <th class="px-5 py-3 font-semibold text-right">Credit</th>
+                        <th class="px-5 py-3 font-semibold text-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-50">
+                    @if (Model.Rows.Count == 0)
+                    {
+                        <tr><td colspan="5" class="px-5 py-10 text-center text-sm text-stone-400">No posted lines for this account yet.</td></tr>
+                    }
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr class="hover:bg-stone-50">
+                            <td class="px-5 py-3 text-stone-500 tnum">@row.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)</td>
+                            <td class="px-5 py-3"><a href="@Url.Action("Details", "JournalEntries", new { id = row.EntryId })" class="font-medium text-stone-800 tnum hover:text-brand-700">@row.Reference</a> <span class="text-stone-400">@row.Description</span></td>
+                            <td class="px-5 py-3 text-right tnum @(row.Debit > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(row.Debit > 0 ? Money.Format(row.Debit) : "—")</td>
+                            <td class="px-5 py-3 text-right tnum @(row.Credit > 0 ? "font-medium text-stone-800" : "text-stone-300")">@(row.Credit > 0 ? Money.Format(row.Credit) : "—")</td>
+                            <td class="px-5 py-3 text-right tnum font-medium text-stone-900">@Money.FormatSigned(row.RunningBalance)</td>
+                        </tr>
+                    }
+                </tbody>
+                @if (Model.Rows.Count > 0)
+                {
+                    <tfoot>
+                        <tr class="border-t border-stone-200 bg-stone-50/70 text-sm font-semibold">
+                            <td class="px-5 py-3 text-stone-500" colspan="4">Closing balance</td>
+                            <td class="px-5 py-3 text-right text-stone-900 tnum">@Money.FormatSigned(Model.ClosingBalance)</td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+    </div>
+</div>
